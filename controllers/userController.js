@@ -427,7 +427,7 @@ exports.updateProfile = async (req, res) => {
     console.error("Profile Update Error:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while updating profile",
+      message: "This mobile number is already registered",
     });
   }
 };

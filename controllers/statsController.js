@@ -2,34 +2,52 @@ const db = require("../config/db");
 
 exports.getTrendData = async (req, res) => {
   try {
+    const { type } = req.params;
+
+    let dateFilter = "";
+
+    if (type === "week") {
+      dateFilter = "WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+    } 
+    else if (type === "month") {
+      dateFilter = "WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+    } 
+    else if (type === "year") {
+      dateFilter = "WHERE YEAR(created_at) = YEAR(CURDATE())";
+    } 
+    else {
+      return res.status(400).json({ success: false, message: "Invalid type" });
+    }
 
     const [registrations] = await db.promise().query(`
       SELECT 
-        MONTH(created_at) as monthNumber,
-        MONTHNAME(created_at) as name,
+        DATE(created_at) as date,
         COUNT(*) as registrations
       FROM users
-      GROUP BY MONTH(created_at)
-      ORDER BY MONTH(created_at)
+      ${dateFilter}
+      GROUP BY DATE(created_at)
+      ORDER BY DATE(created_at)
     `);
 
     const [inquiries] = await db.promise().query(`
       SELECT 
-        MONTH(created_at) as monthNumber,
-        MONTHNAME(created_at) as name,
+        DATE(created_at) as date,
         COUNT(*) as inquiries
       FROM inquiries
-      GROUP BY MONTH(created_at)
-      ORDER BY MONTH(created_at)
+      ${dateFilter}
+      GROUP BY DATE(created_at)
+      ORDER BY DATE(created_at)
     `);
 
     const trendData = registrations.map(reg => {
-      const inquiryMatch = inquiries.find(inq => inq.monthNumber === reg.monthNumber);
+      const match = inquiries.find(inq => 
+        new Date(inq.date).getTime() === new Date(reg.date).getTime()
+      );
 
       return {
-        name: reg.name.substring(0,3),
+        name: new Date(reg.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
         registrations: reg.registrations,
-        inquiries: inquiryMatch ? inquiryMatch.inquiries : 0
+        inquiries: match ? match.inquiries : 0
       };
     });
 

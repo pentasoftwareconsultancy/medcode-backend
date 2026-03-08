@@ -6,6 +6,7 @@ exports.bookDemo = async (req, res) => {
   const { email, country_code, phone } = req.body;
 
   try {
+
     if (!email || !phone || !country_code) {
       return res.status(400).json({
         success: false,
@@ -13,20 +14,6 @@ exports.bookDemo = async (req, res) => {
       });
     }
 
-    // ✅ FIXED COLUMN NAMES HERE
-    const [user] = await db.query(
-      "SELECT id FROM users WHERE email = ? AND countryCode = ? AND mobile = ?",
-      [email, country_code, phone]
-    );
-
-    if (user.length === 0) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid Email or Mobile ❌"
-      });
-    }
-
-    // insert into demo_requests (this table can still use country_code & phone)
     await db.query(
       "INSERT INTO demo_requests (email, country_code, phone) VALUES (?, ?, ?)",
       [email, country_code, phone]
@@ -57,7 +44,7 @@ exports.verifyUser = async (req, res) => {
     }
 
     const [rows] = await db.query(
-      "SELECT id FROM users WHERE email = ? AND country_code = ? AND phone = ?",
+      "SELECT id FROM users WHERE email = ? AND countryCode = ? AND mobile = ?",
       [email, country_code, phone]
     );
 

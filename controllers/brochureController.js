@@ -29,7 +29,7 @@ const requestBrochure = async (req, res) => {
 
     // ✅ SAVE REQUEST
     await db.query(
-      `INSERT INTO brochure_requests (email, mobile)
+      `INSERT INTO brochure_requests (email, phone)
        VALUES (?, ?)`,
       [email, mobile]
     );
@@ -83,7 +83,7 @@ const updateBrochureRequest = async (req, res) => {
 
     await db.query(
       `UPDATE brochure_requests
-       SET email = ?, mobile = ?
+       SET email = ?, phone = ?
        WHERE id = ?`,
       [email, mobile, id]
     );

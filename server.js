@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
+const createTables = require("./config/initDB");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -40,4 +41,13 @@ app.use("/api/admin-profile", require("./routes/adminRoutes"));
 app.use("/api", require("./routes/demoRoutes"));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Initialize database tables
+createTables()
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error("Failed to initialize database:", err);
+    process.exit(1);
+  });
